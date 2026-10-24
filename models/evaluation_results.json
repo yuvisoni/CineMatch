@@ -1,0 +1,49 @@
+{
+  "dataset": {
+    "name": "MovieLens Latest Small",
+    "total_ratings": 100836,
+    "train_ratings": 80668,
+    "test_ratings": 20168,
+    "users": 610,
+    "movies": 9724
+  },
+  "rating_prediction": {
+    "global_mean_baseline": {
+      "rmse": 1.0488,
+      "mae": 0.8316
+    },
+    "svd_collaborative": {
+      "rmse": 0.8797,
+      "mae": 0.6728
+    },
+    "rmse_improvement_pct": 16.12
+  },
+  "ranking_performance_at_10": {
+    "popularity_baseline": {
+      "precision@10": 0.146,
+      "recall@10": 0.1012,
+      "ndcg@10": 0.1782
+    },
+    "content_based": {
+      "precision@10": 0.009,
+      "recall@10": 0.0082,
+      "ndcg@10": 0.0111
+    },
+    "collaborative_filtering": {
+      "precision@10": 0.437,
+      "recall@10": 0.3632,
+      "ndcg@10": 0.5426
+    },
+    "hybrid": {
+      "precision@10": 0.009,
+      "recall@10": 0.0083,
+      "ndcg@10": 0.016
+    }
+  },
+  "methodology": {
+    "split": "80/20 train/test without cross-leakage",
+    "relevance_threshold": 4.0,
+    "top_k": 10,
+    "evaluation_users": 100
+  }
+}
