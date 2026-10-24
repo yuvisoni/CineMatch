@@ -57,7 +57,7 @@ def main() -> None:
     )
 
     out_path = data_dir / "movies_processed.csv"
-    processed_movies.to_csv(out_path, index=False)
+    processed_movies.to_csv(out_path, index=False, encoding="utf-8")
     print(f"      - Preprocessed metadata saved to: {out_path}")
 
     print("\n[3/3] Validation check on sample processed records:")

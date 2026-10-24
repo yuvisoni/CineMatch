@@ -65,10 +65,10 @@ def load_raw_data(data_dir: Optional[Path | str] = None) -> Dict[str, pd.DataFra
         )
         raise DatasetNotFoundError(error_msg)
 
-    movies = pd.read_csv(data_dir / "movies.csv")
-    ratings = pd.read_csv(data_dir / "ratings.csv")
-    tags = pd.read_csv(data_dir / "tags.csv")
-    links = pd.read_csv(data_dir / "links.csv")
+    movies = pd.read_csv(data_dir / "movies.csv", encoding="utf-8")
+    ratings = pd.read_csv(data_dir / "ratings.csv", encoding="utf-8")
+    tags = pd.read_csv(data_dir / "tags.csv", encoding="utf-8")
+    links = pd.read_csv(data_dir / "links.csv", encoding="utf-8")
 
     return {
         "movies": movies,

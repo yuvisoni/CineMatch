@@ -11,6 +11,8 @@ from scipy.sparse import csr_matrix
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 
+from src.preprocessing import normalize_search_string
+
 
 class ContentBasedRecommender:
     """Recommender utilizing TF-IDF text features and on-demand cosine similarity.
@@ -82,6 +84,13 @@ class ContentBasedRecommender:
         for title, m_id in self.title_to_id.items():
             if q_str in title:
                 return m_id
+
+        # Normalized search matching (stripping accents, punctuation)
+        norm_q = normalize_search_string(q_str)
+        if norm_q:
+            for title, m_id in self.clean_title_to_id.items():
+                if norm_q == normalize_search_string(title) or norm_q in normalize_search_string(title):
+                    return m_id
 
         return None
 

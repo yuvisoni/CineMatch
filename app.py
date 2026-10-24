@@ -248,8 +248,14 @@ if not check_dataset_setup():
 service = get_service()
 
 # -----------------------------------------------------------------------------
-# Session State Management
+# Session State Management & Navigation Helper
 # -----------------------------------------------------------------------------
+if "nav_radio" not in st.session_state:
+    st.session_state.nav_radio = "Home"
+
+if "active_page" not in st.session_state:
+    st.session_state.active_page = "Home"
+
 if "user_favorites" not in st.session_state:
     # Default initial favorites for cold-start exploration
     st.session_state.user_favorites = {
@@ -258,11 +264,17 @@ if "user_favorites" not in st.session_state:
         296: 4.5,  # Pulp Fiction
     }
 
-if "active_page" not in st.session_state:
-    st.session_state.active_page = "Home"
-
 if "selected_movie_id" not in st.session_state:
     st.session_state.selected_movie_id = 1
+
+
+def navigate_to(page_name: str, movie_id: Optional[int] = None) -> None:
+    """Safely transition to another page and optional movie target in Streamlit."""
+    st.session_state.nav_radio = page_name
+    st.session_state.active_page = page_name
+    if movie_id is not None:
+        st.session_state.selected_movie_id = int(movie_id)
+    st.rerun()
 
 
 # -----------------------------------------------------------------------------
@@ -362,15 +374,16 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
+    def on_nav_change():
+        st.session_state.active_page = st.session_state.nav_radio
+
     page = st.radio(
         "Navigation",
         options=["Home", "Discover Movies", "For You", "Movie Details", "Model Insights"],
-        index=["Home", "Discover Movies", "For You", "Movie Details", "Model Insights"].index(
-            st.session_state.active_page
-        ),
         key="nav_radio",
+        on_change=on_nav_change,
     )
-    st.session_state.active_page = page
+    st.session_state.active_page = st.session_state.nav_radio
 
     st.markdown("---")
     st.markdown("### 👤 User Persona Profile")
@@ -448,9 +461,7 @@ if st.session_state.active_page == "Home":
                 with cols[idx % 4]:
                     st.markdown(render_movie_card_html(movie), unsafe_allow_html=True)
                     if st.button("Explore Movie", key=f"btn_explore_{movie['movieId']}", use_container_width=True):
-                        st.session_state.selected_movie_id = movie["movieId"]
-                        st.session_state.active_page = "Movie Details"
-                        st.rerun()
+                        navigate_to("Movie Details", movie["movieId"])
         else:
             st.info("No matching movies found. Try another search query.")
         st.markdown("---")
@@ -472,8 +483,7 @@ if st.session_state.active_page == "Home":
     with col_cta2:
         st.write("")
         if st.button("🚀 Go to For You", use_container_width=True):
-            st.session_state.active_page = "For You"
-            st.rerun()
+            navigate_to("For You")
 
     # Section 1: Most Popular Movies
     st.markdown("### 🔥 Most Popular Movies")
@@ -484,9 +494,7 @@ if st.session_state.active_page == "Home":
         with pop_cols[idx % 4]:
             st.markdown(render_movie_card_html(movie), unsafe_allow_html=True)
             if st.button("View Details", key=f"pop_{movie['movieId']}", use_container_width=True):
-                st.session_state.selected_movie_id = movie["movieId"]
-                st.session_state.active_page = "Movie Details"
-                st.rerun()
+                navigate_to("Movie Details", movie["movieId"])
 
     st.markdown("---")
 
@@ -501,9 +509,7 @@ if st.session_state.active_page == "Home":
         with high_cols[idx % 4]:
             st.markdown(render_movie_card_html(movie), unsafe_allow_html=True)
             if st.button("View Details", key=f"high_{movie['movieId']}", use_container_width=True):
-                st.session_state.selected_movie_id = movie["movieId"]
-                st.session_state.active_page = "Movie Details"
-                st.rerun()
+                navigate_to("Movie Details", movie["movieId"])
 
 
 # -----------------------------------------------------------------------------
@@ -543,9 +549,7 @@ elif st.session_state.active_page == "Discover Movies":
                 btn_col1, btn_col2 = st.columns(2)
                 with btn_col1:
                     if st.button("Inspect", key=f"disc_insp_{movie['movieId']}", use_container_width=True):
-                        st.session_state.selected_movie_id = movie["movieId"]
-                        st.session_state.active_page = "Movie Details"
-                        st.rerun()
+                        navigate_to("Movie Details", movie["movieId"])
                 with btn_col2:
                     is_fav = movie["movieId"] in st.session_state.user_favorites
                     label = "❤️ Favorited" if is_fav else "🤍 Favorite"
@@ -697,9 +701,7 @@ elif st.session_state.active_page == "For You":
             with rec_cols[idx % 4]:
                 st.markdown(render_movie_card_html(rec, show_reason=True), unsafe_allow_html=True)
                 if st.button("Inspect Movie", key=f"rec_insp_{rec['movieId']}", use_container_width=True):
-                    st.session_state.selected_movie_id = rec["movieId"]
-                    st.session_state.active_page = "Movie Details"
-                    st.rerun()
+                    navigate_to("Movie Details", rec["movieId"])
 
 
 # -----------------------------------------------------------------------------
@@ -816,8 +818,7 @@ elif st.session_state.active_page == "Movie Details":
                 with sim_cols[idx % 4]:
                     st.markdown(render_movie_card_html(s_movie, show_reason=True), unsafe_allow_html=True)
                     if st.button("Explore", key=f"sim_exp_{s_movie['movieId']}", use_container_width=True):
-                        st.session_state.selected_movie_id = s_movie["movieId"]
-                        st.rerun()
+                        navigate_to("Movie Details", s_movie["movieId"])
 
 
 # -----------------------------------------------------------------------------

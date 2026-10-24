@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 import pandas as pd
 
 from src.data_loader import get_default_data_dir, load_raw_data, validate_dataset_presence
-from src.preprocessing import prepare_movie_metadata
+from src.preprocessing import prepare_movie_metadata, normalize_search_string
 from src.content_based import ContentBasedRecommender
 from src.collaborative_filtering import CollaborativeFilteringRecommender
 from src.hybrid_recommender import HybridRecommender
@@ -151,10 +151,14 @@ class MovieService:
         df = self.movies_df
 
         if query and query.strip():
-            q = query.strip().lower()
+            raw_q = query.strip().lower()
+            norm_q = normalize_search_string(query)
+            if "search_title" not in df.columns:
+                df["search_title"] = df["clean_title"].apply(normalize_search_string)
             df = df[
-                df["clean_title"].str.lower().str.contains(q, regex=False)
-                | df["title"].str.lower().str.contains(q, regex=False)
+                df["clean_title"].str.lower().str.contains(raw_q, regex=False)
+                | df["title"].str.lower().str.contains(raw_q, regex=False)
+                | df["search_title"].str.contains(norm_q, regex=False)
             ]
 
         if genre and genre != "All":

@@ -3,9 +3,24 @@
 from __future__ import annotations
 
 import re
+import unicodedata
 from typing import Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
+
+
+def normalize_search_string(text: str) -> str:
+    """Normalize text for fuzzy title search: strip accents, normalize punctuation."""
+    if not isinstance(text, str):
+        return ""
+    # Strip accents (e.g. é -> e)
+    nfkd = unicodedata.normalize("NFKD", text)
+    stripped = "".join([c for c in nfkd if not unicodedata.combining(c)])
+    # Convert middle dots, replacement chars, hyphens, underscores to spaces
+    cleaned = re.sub(r"[\u00b7\u2022\ufffd\-_/\\:.]", " ", stripped)
+    # Remove remaining non-alphanumeric chars
+    cleaned = re.sub(r"[^\w\s]", "", cleaned)
+    return re.sub(r"\s+", " ", cleaned).strip().lower()
 
 
 def extract_title_and_year(raw_title: str) -> Tuple[str, Optional[int]]:
@@ -141,6 +156,7 @@ def prepare_movie_metadata(
     title_year = df["title"].apply(extract_title_and_year)
     df["clean_title"] = [t[0] for t in title_year]
     df["year"] = [t[1] for t in title_year]
+    df["search_title"] = df["clean_title"].apply(normalize_search_string)
 
     # Parse genres
     df["genres"] = df["genres"].apply(parse_genres)
