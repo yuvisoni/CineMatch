@@ -1,0 +1,8 @@
+# Place MovieLens dataset files here:
+# - movies.csv
+# - ratings.csv
+# - tags.csv
+# - links.csv
+#
+# Download from: https://grouplens.org/datasets/movielens/latest/
+# Direct link: https://files.grouplens.org/datasets/movielens/ml-latest-small.zip
